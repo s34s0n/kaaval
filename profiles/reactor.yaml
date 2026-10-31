@@ -1,0 +1,164 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Kaaval deployment profile #2 — jacketed chemical reactor (CSTR).
+#
+# Proof that the product is plug-into-any-plant: a GENUINELY different process
+# (exothermic reactor, different physics, different S7 tags, Reactor.* OPC nodes)
+# defended by the SAME engine with zero application-code change. Same network
+# topology and protocol policy as profile #1; only the plant differs. Select with
+# `scripts/use_profile.sh reactor` (sets KAAVAL_PROCESS=reactor + this profile).
+
+name: Chemical Reactor (CSTR)
+description: Jacketed exothermic reactor; high-temperature safety interlock guards against thermal runaway.
+
+assets:
+  - id: plc
+    ips: ["172.30.0.10"]
+    role: "Siemens PLC (reactor controller)"
+    domain: OT
+    criticality: critical
+    process_context: >
+      Runs the reactor temperature-control logic and the high-temperature safety
+      interlock. An unauthorized write here can defeat the interlock or cut jacket
+      cooling, driving an exothermic thermal runaway and loss of containment.
+  - id: gateway
+    ips: ["172.30.0.11"]
+    role: "IT/OT gateway"
+    domain: OT
+    criticality: high
+    process_context: >
+      Authorized boundary device: polls the reactor PLC over S7comm and exposes
+      OPC UA to the IT side. The only authorized S7comm client of the PLC.
+  - id: ews
+    ips: ["172.30.0.12"]
+    role: "Engineering workstation"
+    domain: IT
+    criticality: high
+    process_context: >
+      Operator workstation. Not an authorized OT speaker — any S7comm or OPC UA
+      it originates is anomalous.
+  - id: soc_backend
+    ips: ["127.0.0.1"]
+    role: "Kaaval SOC backend (authorized OPC UA client)"
+    domain: IT
+    criticality: high
+    process_context: >
+      Authorized OPC UA client; reads process state and issues approved control
+      writes through the gateway (never direct to the PLC).
+  # NOTE: the adversary (172.30.0.14) and C2 (172.30.0.13) are intentionally NOT
+  # declared. Passive discovery learns them only when the attack runs, as UNMANAGED
+  # hosts that rogue-host detection flags. The adversary label is a CONCLUSION from
+  # behavior in the correlation/narrative layer, never a pre-seeded inventory entry.
+
+# Same declared protocol policy as profile #1 (the topology is identical; only the
+# plant behind the PLC differs).
+authorization:
+  s7comm:
+    allowed_clients: [gateway]
+    allow_write: false
+  opcua:
+    allowed_clients: [soc_backend, gateway]
+    allow_write: true
+  ssh:
+    allowed_clients: []
+
+# Physical-safety descriptor — reactor temperature is the protected variable.
+safety:
+  variable: reactor_temp_c
+  unit: degC
+  label: Reactor temperature
+  band: [60.0, 120.0]
+  danger: 280.0            # thermal-runaway threshold
+  interlock_tag: hightemp_interlock_enabled
+  control_tag: coolant_valve_pct     # the authorized operator setpoint
+  control_baseline: 50.0
+
+process_view:
+  title: Chemical reactor
+  primary: reactor_temp_c
+  tags:
+    - {tag: reactor_temp_c,             label: Reactor temp,      unit: °C}
+    - {tag: reactor_pressure_bar,       label: Vessel pressure,   unit: bar}
+    - {tag: coolant_flow_pct,           label: Coolant flow,      unit: "%"}
+    - {tag: agitator_speed_pct,         label: Agitator,          unit: "%"}
+    - {tag: coolant_valve_pct,          label: Coolant setpoint,  unit: "%"}
+    - {tag: hightemp_interlock_enabled, label: High-temp interlock, kind: bool}
+    - {tag: feed_pump_running,          label: Feed running,      kind: bool}
+
+# OPC UA node map — must match what the reactor gateway serves (Reactor.* nodes).
+opcua_nodes:
+  namespace_uri: "http://traboda.com/kaaval/reactor"
+  nodes:
+    reactor_temp_c: "Reactor.ReactorTemp"
+    reactor_pressure_bar: "Reactor.ReactorPressure"
+    coolant_flow_pct: "Reactor.CoolantFlow"
+    agitator_speed_pct: "Reactor.AgitatorSpeed"
+    coolant_valve_pct: "Reactor.CoolantValve"
+    temp_high_limit_c: "Reactor.TempHighLimit"
+    hightemp_interlock_enabled: "Reactor.HighTempInterlockEnabled"
+    hightemp_tripped: "Reactor.HighTempTripped"
+    feed_pump_running: "Reactor.FeedPumpRunning"
+
+# Response action catalog — IT containment identical to profile #1; OT recovery
+# targets the reactor's interlock + coolant setpoint. gating decides auto-vs-gated
+# from attributes, never the action name.
+actions:
+  - id: isolate_ews_ot
+    title: "Isolate the engineering workstation from the OT segment"
+    kind: it
+    rationale: "Cut the compromised workstation off from the OT segment to stop further control-plane access."
+    attributes: {control_plane: false, reversible: true, affects_process: false}
+    relevant_when: {always: true}
+    executor:
+      type: iptables
+      target: ews
+      rules:
+        - {proto: tcp, dport: 102}
+        - {proto: tcp, dport: 4840}
+
+  - id: block_c2_egress
+    title: "Block the workstation's C2 egress (TLS/DNS beacon)"
+    kind: it
+    rationale: "Sever the workstation's command-and-control channel."
+    attributes: {control_plane: false, reversible: true, affects_process: false}
+    relevant_when: {rule: c2_beaconing}
+    executor:
+      type: iptables
+      target: ews
+      rules:
+        - {proto: tcp, dport: 443}
+        - {proto: udp, dport: 53}
+
+  - id: disable_ews_account
+    title: "Disable the compromised engineer account on the workstation"
+    kind: it
+    rationale: "Revoke the compromised operator credentials used in the intrusion."
+    attributes: {control_plane: false, reversible: true, affects_process: false}
+    relevant_when: {rule: external_remote_access}
+    executor:
+      type: account_lock
+      target: ews
+      user: engineer
+
+  - id: rearm_hightemp_interlock
+    title: "Re-arm the high-temperature safety interlock"
+    kind: ot
+    rationale: "Restore the disabled high-temperature interlock so the reactor trips the feed before runaway."
+    attributes: {control_plane: true, reversible: true, affects_process: true}
+    relevant_when: {ot_write: true}
+    executor:
+      type: opcua_write
+      writes:
+        - {tag: hightemp_interlock_enabled, value: true, vtype: bool}
+      verify: {tag: hightemp_interlock_enabled, equals: true}
+
+  - id: restore_coolant_setpoint
+    title: "Restore the safe coolant setpoint"
+    kind: ot
+    rationale: "Return the jacket coolant valve to its safe operating setpoint to remove reaction heat."
+    attributes: {control_plane: true, reversible: true, affects_process: true}
+    relevant_when: {ot_write: true}
+    executor:
+      type: opcua_write
+      writes:
+        - {tag: coolant_valve_pct, value: 50.0, vtype: real}
+      verify: {tag: coolant_valve_pct, near: 50.0, tol: 1.0}

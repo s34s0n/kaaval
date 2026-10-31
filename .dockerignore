@@ -1,0 +1,26 @@
+# Keep the backend build context (repo root) lean and reproducible.
+.git
+.gitignore
+.venv
+venv
+**/__pycache__
+**/*.py[cod]
+logs/*
+!logs/.gitkeep
+node_modules
+frontend/node_modules
+frontend/dist
+docs
+scripts
+*.sqlite
+*.db
+backend/kaaval.sqlite
+backend/rules.json
+backend/assets.json
+backend/inventory.json
+backend/auth.json
+backend/llm.json
+backend/siem.json
+.env
+.claude
+.DS_Store

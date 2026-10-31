@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Framework mapping CONFIG (versioned). Each control names a deterministic check
+# (backend/app/compliance.py CHECKS) evaluated over store evidence. The LLM never
+# sets a control's status. Update this file as the standard revises.
+config_schema: 1
+framework:
+  id: iec_62443_3_3
+  name: "IEC 62443-3-3"
+  full_name: "Security for industrial automation and control systems — System security requirements and security levels"
+  version: "2013"
+  authority: "IEC / ISA"
+  note: "Subset assessable from network + SOC telemetry. Foundational Requirements FR1–FR7."
+
+controls:
+  - id: "SR 1.1"
+    family: "FR1 · Identification & Authentication Control"
+    title: "Human user identification and authentication"
+    check: separation_of_duties
+  - id: "SR 1.2"
+    family: "FR1 · Identification & Authentication Control"
+    title: "Software process / device authentication (authorized OT clients)"
+    check: ot_access_control
+  - id: "SR 2.1"
+    family: "FR2 · Use Control"
+    title: "Authorization enforcement"
+    check: ot_access_control
+  - id: "SR 2.8"
+    family: "FR2 · Use Control"
+    title: "Auditable events"
+    check: audit_logging
+  - id: "SR 2.12"
+    family: "FR2 · Use Control"
+    title: "Non-repudiation (control actions attributable to an approver)"
+    check: human_approval_gate
+  - id: "SR 3.2"
+    family: "FR3 · System Integrity"
+    title: "Malicious code / unauthorized control protection"
+    check: detection_capability
+  - id: "SR 4.1"
+    family: "FR4 · Data Confidentiality"
+    title: "Information confidentiality (controlled egress of OT data)"
+    check: egress_control
+  - id: "SR 5.1"
+    family: "FR5 · Restricted Data Flow"
+    title: "Network segmentation (zones and conduits)"
+    check: zones_conduits
+  - id: "SR 5.2"
+    family: "FR5 · Restricted Data Flow"
+    title: "Zone boundary protection"
+    check: zones_conduits
+  - id: "SR 6.1"
+    family: "FR6 · Timely Response to Events"
+    title: "Audit log accessibility"
+    check: audit_logging
+  - id: "SR 6.2"
+    family: "FR6 · Timely Response to Events"
+    title: "Continuous monitoring"
+    check: network_monitoring
+  - id: "SR 6.2b"
+    family: "FR6 · Timely Response to Events"
+    title: "Incident detection and response"
+    check: incident_response
+  - id: "SR 7.3"
+    family: "FR7 · Resource Availability"
+    title: "Control system backup"
+    check: not_assessed
+    params:
+      reason: "Backup/restore posture is not observable from network telemetry; assess by operational review."
+  - id: "SR 7.4"
+    family: "FR7 · Resource Availability"
+    title: "Control system recovery and reconstitution"
+    check: remediation_verification

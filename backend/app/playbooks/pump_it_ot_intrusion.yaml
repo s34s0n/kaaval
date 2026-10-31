@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Response playbook (versioned, profile-bound). A playbook PROPOSES an ordered
+# sequence of investigation steps + actions. It does NOT pre-authorize anything:
+# every action step is resolved against the code-derived action catalog and the
+# existing gate at runtime, and each gated OT step is approved individually by an
+# approver. `action:` may reference ONLY an id that exists in the profile's action
+# catalog — an unknown id fails closed.
+config_schema: 1
+playbook:
+  id: pump_it_ot_intrusion
+  name: "IT→OT intrusion — contain then recover"
+  version: "2026.06"
+  profile: pumpstation
+  authority: "Kaaval response library"
+  description: >
+    For a cross-domain intrusion that pivots from the IT engineering workstation
+    into the OT control path. Contain the IT foothold first (reversible), verify
+    the process state, then recover OT safety state under human approval.
+  match:
+    techniques: [T0822, T0869, T0846, T0855, T0836, T0831]
+    cross_domain: true
+
+steps:
+  - step: investigate
+    title: "Confirm the IT foothold"
+    detail: >
+      Review external remote access and SSH to the engineering workstation (ews).
+      Establish how the workstation was reached and which account was used.
+  - step: investigate
+    title: "Confirm the OT manipulation"
+    detail: >
+      Correlate the S7comm/OPC UA writes originating from ews to the PLC/gateway —
+      the ews is not an authorized OT client, so any such write is the manipulation.
+  - step: action
+    action: isolate_ews_ot
+    why: "Cut the compromised workstation off the OT segment before it can issue more control writes."
+  - step: action
+    action: block_c2_egress
+    why: "Sever the workstation's command-and-control channel so the operator cannot be re-tasked."
+  - step: action
+    action: disable_ews_account
+    why: "Revoke the compromised engineer credentials used in the intrusion."
+  - step: investigate
+    title: "Verify process state on FRESH telemetry"
+    detail: >
+      Read the discharge-pressure interlock and pump setpoint from a fresh telemetry
+      window (not cached) to see what the attacker changed before recovering.
+  - step: action
+    action: rearm_interlock
+    why: "Restore the disabled discharge-pressure safety interlock — gated OT recovery, approver decision."
+  - step: action
+    action: restore_setpoint
+    why: "Return the pump setpoint to its safe operating value — gated OT recovery, approver decision."

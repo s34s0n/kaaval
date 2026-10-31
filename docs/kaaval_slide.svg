@@ -1,0 +1,270 @@
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg" font-family="Calibri, 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#0a0f1b"/>
+      <stop offset="1" stop-color="#0c1424"/>
+    </linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <style>
+      text{fill:#eef2f8;}
+      .ttl{font-weight:700;}
+      .mut{fill:#94a4bd;}
+      .ip{fill:#cbd5e1;font-family:'Courier New',monospace;}
+      .zttl{font-weight:700;}
+      .ntl{font-weight:700;fill:#f3f7fc;}
+      .nsb{fill:#aab8cc;}
+      /* card classes: fill + stroke */
+      .c-plant{fill:#241608;stroke:#fb923c;}
+      .c-piv{fill:#3a1c05;stroke:#f97316;}
+      
+      .c-detf{fill:#10213d;stroke:#4b8bf5;}
+      .c-llm{fill:#1c1636;stroke:#a78bfa;}
+      .c-gate{fill:#2c2208;stroke:#f5b942;}
+      .c-cap{fill:#0b2730;stroke:#22d3ee;}
+      .c-cfg{fill:#0c281f;stroke:#34d399;}
+      .c-ui{fill:#16182f;stroke:#818cf8;}
+      .zone{fill:#0e1626;fill-opacity:.5;}
+      /* arrows */
+      .a-attack{stroke:#f4574f;stroke-width:3;fill:none;}
+      .a-attackd{stroke:#f4574f;stroke-width:2.4;fill:none;stroke-dasharray:8 6;}
+      .a-legit{stroke:#38bdf8;stroke-width:2.6;fill:none;}
+      .a-spine{stroke:#5b9bf5;stroke-width:3.2;fill:none;}
+      .a-cap{stroke:#22d3ee;stroke-width:2.6;fill:none;stroke-dasharray:8 6;}
+      .a-cfg{stroke:#34d399;stroke-width:2.2;fill:none;stroke-dasharray:7 6;}
+      .a-llm{stroke:#a78bfa;stroke-width:2.4;fill:none;stroke-dasharray:7 6;}
+      .a-loop{stroke:#7c8aa0;stroke-width:2.4;fill:none;stroke-dasharray:3 6;}
+      .lbl{font-size:14px;fill:#cbd5e1;}
+      .lbl-a{font-size:14px;fill:#fca5a5;}
+      .lbl-c{font-size:14px;fill:#6ee7b7;}
+      .lbl-l{font-size:14px;fill:#c4b5fd;}
+      .phase{font-size:14px;font-weight:700;letter-spacing:2px;}
+    </style>
+    <marker id="ma" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f4574f"/></marker>
+    <marker id="ml" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#38bdf8"/></marker>
+    <marker id="ms" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5b9bf5"/></marker>
+    <marker id="mc" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#22d3ee"/></marker>
+    <marker id="mg" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#34d399"/></marker>
+    <marker id="mv" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#a78bfa"/></marker>
+    <marker id="mo" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7c8aa0"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="1920" height="1080" fill="url(#bg)"/>
+
+  <!-- TITLE -->
+  <text class="ttl" x="64" y="56" font-size="40">Kaaval — Agentic IT/OT Security Operations Center</text>
+  <text class="mut" x="64" y="84" font-size="15.5">One passive sensor sees the whole IT→OT attack · agents correlate it into a single cross-domain incident · a deterministic, human-gated response is verified.</text>
+
+  <!-- LEGEND -->
+  <g font-size="13.5">
+    <rect x="64"   y="100" width="15" height="15" rx="3" fill="#10213d" stroke="#4b8bf5"/><text x="86"  y="112">Deterministic / code</text>
+    <rect x="360"  y="100" width="15" height="15" rx="3" fill="#1c1636" stroke="#a78bfa"/><text x="382" y="112">LLM (explains only)</text>
+    <rect x="650"  y="100" width="15" height="15" rx="3" fill="#2c2208" stroke="#f5b942"/><text x="672" y="112">Human-gated</text>
+    <rect x="880"  y="100" width="15" height="15" rx="3" fill="#0c281f" stroke="#34d399"/><text x="902" y="112">Profile (config)</text>
+    <rect x="1130" y="100" width="15" height="15" rx="3" fill="#0b2730" stroke="#22d3ee"/><text x="1152" y="112">Network capture point</text>
+    <rect x="1440" y="100" width="15" height="15" rx="3" fill="#241608" stroke="#fb923c"/><text x="1462" y="112">OT / physical plant</text>
+  </g>
+
+  <!-- =============== ZONE 1: PLANT =============== -->
+  <rect class="zone" x="48" y="132" width="1824" height="170" rx="16" stroke="#fb923c" stroke-opacity=".4"/>
+  <circle cx="78" cy="160" r="13" fill="#fb923c"/><text x="78" y="165" text-anchor="middle" font-size="15" fill="#1a1004" class="ttl">1</text>
+  <text class="zttl" x="100" y="166" font-size="17" fill="#fdba74">Simulated Plant — OT zone · Docker 172.30.0.0/24</text>
+
+  <!-- host cards (y 192 h 96) -->
+  <g>
+    <rect class="c-plant" x="64"   y="192" width="300" height="96" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="84" y="220" font-size="16">Attacker</text>
+    <text class="ip"  x="84" y="242" font-size="13">172.30.0.14</text>
+    <text class="nsb" x="84" y="266" font-size="12.5">red-team client · drives the chain</text>
+
+    <rect class="c-plant" x="437"  y="192" width="300" height="96" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="457" y="220" font-size="16">C2 Host</text>
+    <text class="ip"  x="457" y="242" font-size="13">172.30.0.13</text>
+    <text class="nsb" x="457" y="266" font-size="12.5">HTTP API · fires ATT&amp;CK-ICS stages</text>
+
+    <rect class="c-piv" x="810"  y="186" width="300" height="108" rx="11" filter="url(#sh)" stroke-width="2.4"/>
+    <text class="ntl" x="830" y="214" font-size="16">Engineering WS «ews»</text>
+    <text class="ip"  x="830" y="236" font-size="13">172.30.0.12</text>
+    <text class="nsb" x="830" y="258" font-size="12.5" fill="#fdba74">IT/OT PIVOT · runs sshd</text>
+    <text class="nsb" x="830" y="278" font-size="12">⦿ Zeek capture point (in netns)</text>
+
+    <rect class="c-plant" x="1183" y="192" width="300" height="96" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="1203" y="220" font-size="16">IT/OT Gateway</text>
+    <text class="ip"  x="1203" y="242" font-size="13">172.30.0.11</text>
+    <text class="nsb" x="1203" y="266" font-size="12.5" fill="#7dd3fc">asyncua · ONLY authorized S7 client</text>
+
+    <rect class="c-plant" x="1556" y="192" width="300" height="96" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="1576" y="220" font-size="16">PLC</text>
+    <text class="ip"  x="1576" y="242" font-size="13">172.30.0.10</text>
+    <text class="nsb" x="1576" y="266" font-size="12.5" fill="#fdba74">snap7 S7 + physics loop = real process</text>
+  </g>
+  <!-- attack arrows -->
+  <path class="a-attack" d="M364,210 C560,150 700,150 808,196" marker-end="url(#ma)"/>
+  <text class="lbl-a" x="540" y="158">SSH pivot</text>
+  <path class="a-attackd" d="M737,250 L806,250" marker-end="url(#ma)"/>
+  <text class="lbl-a" x="742" y="278">C2 beacon</text>
+  <path class="a-attack" d="M1110,224 L1181,224" marker-end="url(#ma)"/>
+  <text class="lbl-a" x="1100" y="180">OPC UA browse</text>
+  <path class="a-attack" d="M1010,294 C1010,330 1706,332 1706,292" marker-end="url(#ma)"/>
+  <text class="lbl-a" x="1230" y="328">direct S7 write — unauthorized process manipulation</text>
+  <path class="a-legit" d="M1483,224 L1554,224" marker-end="url(#ml)"/>
+  <text class="lbl" x="1418" y="212" fill="#7dd3fc">S7 poll (authorized)</text>
+
+  <!-- =============== ZONE 2: SENSOR =============== -->
+  <rect class="zone" x="48" y="346" width="1824" height="100" rx="16" stroke="#22d3ee" stroke-opacity=".4"/>
+  <circle cx="78" cy="374" r="13" fill="#22d3ee"/><text x="78" y="379" text-anchor="middle" font-size="15" fill="#04222b" class="ttl">2</text>
+  <text class="zttl" x="100" y="380" font-size="17" fill="#67e8f9">Sensor — single passive capture point</text>
+
+  <rect class="c-cap" x="640" y="398" width="560" height="40" rx="9"/>
+  <text class="ntl" x="660" y="424" font-size="14.5">Zeek + ICSNPP (s7comm · opcua-binary) — sidecar in «ews» netns</text>
+  <rect class="c-cap" x="1240" y="398" width="430" height="40" rx="9"/>
+  <text class="ntl" x="1260" y="424" font-size="14.5">JSON logs → ssh ssl dns conn s7comm opcua</text>
+
+  <path class="a-cap" d="M960,296 L920,396" marker-end="url(#mc)"/>
+  <text class="lbl" x="924" y="350" fill="#67e8f9">shares ews ns</text>
+  <path class="a-cap" d="M1200,418 L1236,418" marker-end="url(#mc)"/>
+
+  <!-- =============== ZONE 4: PROFILE (left) =============== -->
+  <rect class="zone" x="48" y="464" width="278" height="430" rx="16" stroke="#34d399" stroke-opacity=".45"/>
+  <circle cx="78" cy="492" r="13" fill="#34d399"/><text x="78" y="497" text-anchor="middle" font-size="15" fill="#042a1f" class="ttl">4</text>
+  <text class="zttl" x="100" y="498" font-size="16" fill="#6ee7b7">Deployment Profile</text>
+  <text class="mut" x="68" y="524" font-size="13">single YAML · scenario-agnostic</text>
+  <g font-size="13.5" fill="#d1fae5">
+    <text x="68" y="566">• assets + criticality</text>
+    <text x="68" y="606">• per-protocol authorization</text>
+    <text x="68" y="646">• OPC UA node map</text>
+    <text x="68" y="686">• response action catalog</text>
+    <text x="84" y="708" class="mut" font-size="11.5">(+ attributes, executors)</text>
+    <text x="68" y="748">• safety descriptor</text>
+    <text x="84" y="770" class="mut" font-size="11.5">(variable · band · danger)</text>
+  </g>
+  <line x1="68" y1="800" x2="306" y2="800" stroke="#34d399" stroke-opacity=".35"/>
+  <text x="68" y="828" font-size="13.5" fill="#6ee7b7">pump.yaml | reactor.yaml</text>
+  <text class="mut" x="68" y="850" font-size="12.5">— engine code is unchanged</text>
+  <text class="mut" x="68" y="878" font-size="12">feeds detection authz, agent</text>
+  <text class="mut" x="68" y="894" font-size="12">context, gating &amp; executors</text>
+
+  <!-- =============== ZONE 3: BACKEND =============== -->
+  <rect class="zone" x="346" y="464" width="1526" height="572" rx="16" stroke="#4b8bf5" stroke-opacity=".4"/>
+  <circle cx="376" cy="492" r="13" fill="#4b8bf5"/><text x="376" y="497" text-anchor="middle" font-size="15" fill="#03152e" class="ttl">3</text>
+  <text class="zttl" x="398" y="498" font-size="17" fill="#9cc2ff">Backend Pipeline — FastAPI · native · on-prem</text>
+
+  <!-- phase labels -->
+  <text class="phase" x="372" y="540" fill="#5b9bf5">DETECT</text>
+  <text class="phase" x="372" y="700" fill="#a78bfa">EXPLAIN</text>
+  <text class="phase" x="372" y="724" fill="#5b9bf5">+ DECIDE</text>
+  <text class="phase" x="372" y="858" fill="#f5b942">RESPOND · GATED</text>
+
+  <!-- Row A: ingestion -->
+  <g>
+    <rect class="c-detf" x="372" y="552" width="196" height="74" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="392" y="584" font-size="15">Log Tailer</text>
+    <text class="nsb" x="392" y="606" font-size="12">streams new lines</text>
+
+    <rect class="c-detf" x="612" y="552" width="220" height="74" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="632" y="582" font-size="15">Rules Engine</text>
+    <text class="nsb" x="632" y="604" font-size="12">config rules · 1 event / burst</text>
+
+    <rect class="c-detf" x="876" y="552" width="150" height="74" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="896" y="584" font-size="15">Events</text>
+    <text class="nsb" x="896" y="606" font-size="12">normalized</text>
+
+    <rect class="c-detf" x="1070" y="552" width="262" height="74" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="1090" y="582" font-size="15">Correlation</text>
+    <text class="nsb" x="1090" y="604" font-size="12">time + shared host → ONE incident</text>
+
+    <rect class="c-detf" x="1576" y="552" width="280" height="74" rx="11" filter="url(#sh)"/>
+    <text class="ntl" x="1596" y="582" font-size="15">Incident Queue</text>
+    <text class="nsb" x="1596" y="604" font-size="12">cross-domain · ATT&amp;CK for ICS</text>
+  </g>
+  <path class="a-spine" d="M568,589 L608,589" marker-end="url(#ms)"/>
+  <path class="a-spine" d="M832,589 L872,589" marker-end="url(#ms)"/>
+  <path class="a-spine" d="M1026,589 L1066,589" marker-end="url(#ms)"/>
+  <path class="a-spine" d="M1332,589 L1572,589" marker-end="url(#ms)"/>
+  <!-- logs -> tailer -->
+  <path class="a-cap" d="M1300,440 C1280,478 700,470 466,548" marker-end="url(#mc)"/>
+  <text class="lbl" x="700" y="466" fill="#67e8f9">tail logs</text>
+
+  <!-- Row B: LLM (explains) + Fix + Gating -->
+  <rect class="c-llm" x="372" y="660" width="700" height="110" rx="12" filter="url(#sh)"/>
+  <text class="ntl" x="392" y="688" font-size="15" fill="#c4b5fd">AI Agents — local Ollama qwen3:30b · offline · strict-JSON</text>
+  <text class="nsb" x="392" y="708" font-size="12" fill="#c4b5fd">EXPLAIN / CURATE ONLY — read the built incident · never raw logs · never decide the fix</text>
+  <g font-size="13" fill="#e6defb">
+    <rect x="392" y="722" width="180" height="34" rx="8" fill="#241a3f" stroke="#a78bfa" stroke-width="1.2"/><text x="402" y="744">Triage</text>
+    <rect x="592" y="722" width="280" height="34" rx="8" fill="#241a3f" stroke="#a78bfa" stroke-width="1.2"/><text x="602" y="744">Investigation · IT↔OT + ATT&amp;CK-ICS</text>
+    <rect x="892" y="722" width="160" height="34" rx="8" fill="#241a3f" stroke="#a78bfa" stroke-width="1.2"/><text x="902" y="744">Response (draft)</text>
+  </g>
+
+  <rect class="c-detf" x="1296" y="664" width="248" height="74" rx="11" filter="url(#sh)"/>
+  <text class="ntl" x="1316" y="694" font-size="15">Fix Selection</text>
+  <text class="nsb" x="1316" y="716" font-size="12">rule→action map (profile) · <tspan fill="#fca5a5">NOT the LLM</tspan></text>
+
+  <rect class="c-detf" x="1576" y="664" width="280" height="74" rx="11" filter="url(#sh)"/>
+  <text class="ntl" x="1596" y="694" font-size="15">OT-Safety Gating (code)</text>
+  <text class="nsb" x="1596" y="716" font-size="12">reversible? control_plane? <tspan fill="#fcd34d">unknown→GATED</tspan></text>
+
+  <!-- incident -> fix (deterministic), incident <-> LLM (explains) -->
+  <path class="a-spine" d="M1716,626 L1716,660" marker-end="url(#ms)"/>
+  <text class="lbl" x="1726" y="648">deterministic</text>
+  <path class="a-spine" d="M1576,701 L1548,701" marker-end="url(#ms)"/>
+  <path class="a-llm" d="M1576,600 C1300,640 1150,650 1076,690" marker-end="url(#mv)"/>
+  <text class="lbl-l" x="1180" y="636">reads incident · returns explanation only</text>
+
+  <!-- Row C: execution -->
+  <rect class="c-cap" x="372" y="804" width="288" height="74" rx="11" filter="url(#sh)"/>
+  <text class="ntl" x="392" y="834" font-size="15" fill="#67e8f9">Auto IT Containment</text>
+  <text class="nsb" x="392" y="856" font-size="12">reversible · AUTO · iptables on ews</text>
+
+  <rect class="c-gate" x="724" y="804" width="288" height="74" rx="11" filter="url(#sh)" stroke-width="2.4"/>
+  <text class="ntl" x="744" y="834" font-size="15" fill="#fde68a">⛔ Human Gate — Approve</text>
+  <text class="nsb" x="744" y="856" font-size="12" fill="#fcd34d">OT / control-plane waits for analyst</text>
+
+  <rect class="c-detf" x="1076" y="804" width="288" height="74" rx="11" filter="url(#sh)"/>
+  <text class="ntl" x="1096" y="834" font-size="15">Control Writes</text>
+  <text class="nsb" x="1096" y="856" font-size="12">real OPC UA writes via gateway</text>
+
+  <rect class="c-detf" x="1428" y="804" width="288" height="74" rx="11" filter="url(#sh)"/>
+  <text class="ntl" x="1448" y="834" font-size="15">Verification</text>
+  <text class="nsb" x="1448" y="856" font-size="12">fresh telemetry · resolved when quiet</text>
+
+  <!-- gating -> auto / human -->
+  <path class="a-spine" d="M1660,738 C1500,776 1100,776 980,802" marker-end="url(#ms)"/>
+  <text class="lbl" x="1180" y="772" fill="#fcd34d">control-plane → gated</text>
+  <path class="a-spine" d="M1620,738 C1300,790 700,786 540,802" marker-end="url(#ms)"/>
+  <text class="lbl" x="640" y="784" fill="#67e8f9">reversible → auto</text>
+  <!-- human gate -> control writes -> verification -->
+  <path class="a-spine" d="M1012,841 L1072,841" marker-end="url(#ms)"/>
+  <text class="lbl" x="1014" y="800" fill="#fde68a">on approve</text>
+  <path class="a-spine" d="M1364,841 L1424,841" marker-end="url(#ms)"/>
+  <!-- auto it -> verification (under) -->
+  <path class="a-spine" d="M516,878 C516,902 1480,902 1480,880" marker-end="url(#ms)"/>
+  <!-- verification loop back to rules -->
+  <path class="a-loop" d="M1716,841 C1830,841 1830,940 920,940 C400,940 360,920 360,640 L360,628" marker-end="url(#mo)"/>
+  <text class="lbl" x="980" y="934">closed loop — re-run detection on a fresh window</text>
+
+  <!-- profile feeds -->
+  <path class="a-cfg" d="M326,589 L608,589" marker-end="url(#mg)"/>
+  <text class="lbl-c" x="340" y="580">authz</text>
+  <path class="a-cfg" d="M326,712 L368,712" marker-end="url(#mg)"/>
+  <text class="lbl-c" x="300" y="640" transform="rotate(0)">context</text>
+  <text class="lbl-c" x="1316" y="660" font-size="12">⌑ profile: action catalog</text>
+  <text class="lbl-c" x="1596" y="660" font-size="12">⌑ profile: action attributes</text>
+
+  <!-- =============== ZONE 5: FRONTEND =============== -->
+  <rect class="zone" x="48" y="906" width="1824" height="112" rx="16" stroke="#818cf8" stroke-opacity=".4"/>
+  <circle cx="78" cy="934" r="13" fill="#818cf8"/><text x="78" y="939" text-anchor="middle" font-size="15" fill="#0a0c24" class="ttl">5</text>
+  <text class="zttl" x="100" y="940" font-size="17" fill="#b4bcff">Frontend — React · REST + WebSocket</text>
+
+  <rect class="c-ui" x="380" y="952" width="720" height="56" rx="11" filter="url(#sh)"/>
+  <text class="ntl" x="400" y="975" font-size="14.5">Kaaval SOC  ·  /</text>
+  <text class="nsb" x="400" y="996" font-size="12">incidents · IT/OT kill-chain · agent assessment · human-gated response · telemetry · rule authoring · chat</text>
+
+  <rect class="c-ui" x="1130" y="952" width="600" height="56" rx="11" filter="url(#sh)"/>
+  <text class="ntl" x="1150" y="975" font-size="14.5">Range Console  ·  /range</text>
+  <text class="nsb" x="1150" y="996" font-size="12">live process view · attack panel (drives C2/Attacker API) · malicious-vs-legitimate controls</text>
+
+  <!-- CAPTION -->
+  <rect x="48" y="1030" width="1824" height="42" rx="10" fill="#101a2c" stroke="#4b8bf5" stroke-opacity=".6"/>
+  <text x="68" y="1057" font-size="14.5"><tspan font-weight="700" fill="#9cc2ff">Core principle:  </tspan>decisions are deterministic and code-enforced · the local LLM only explains &amp; correlates · anything touching the physical process requires human approval.</text>
+</svg>

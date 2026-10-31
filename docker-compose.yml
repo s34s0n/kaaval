@@ -1,0 +1,228 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Kaaval — Agentic IT/OT-SOC. One stack: simulated plant (S7comm PLC + OPC UA
+# gateway), IT hosts (ews pivot + external c2), the red-team attacker, the Zeek +
+# ICSNPP sensor (sidecar in the ews net namespace), and the product itself
+# (backend + frontend). Default LLM provider is OpenRouter (cloud) — set a key in
+# .env. `--profile local` adds a local Ollama for fully-offline operation.
+#
+#   cp .env.example .env    # add OPENROUTER_API_KEY
+#   docker compose up -d --build
+#   open http://localhost:8080
+#
+# SECURITY: this stack ships a deliberately vulnerable workstation and a live
+# attacker. Run it ONLY on an isolated lab host. All host ports bind to 127.0.0.1.
+
+name: kaaval
+
+services:
+  plc:
+    build: ./sim
+    command: ["python", "plc.py"]
+    environment:
+      S7_PORT: "102"
+      PLC_TICK_HZ: "10"
+      KAAVAL_PROCESS: "${KAAVAL_PROCESS:-pump}"   # which simulated plant to run
+    networks:
+      kaaval:
+        ipv4_address: 172.30.0.10
+    ports:
+      - "127.0.0.1:1102:102"          # host-side debug access to S7comm (optional, localhost only)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 102), 2).close()"]
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  gateway:
+    build: ./sim
+    command: ["python", "gateway.py"]
+    depends_on:
+      plc:
+        condition: service_healthy
+    environment:
+      PLC_HOST: "plc"
+      S7_PORT: "102"
+      OPC_ENDPOINT: "opc.tcp://0.0.0.0:4840/kaaval/"
+      GATEWAY_POLL_HZ: "5"
+      KAAVAL_PROCESS: "${KAAVAL_PROCESS:-pump}"   # must match the plc's process
+    networks:
+      kaaval:
+        ipv4_address: 172.30.0.11
+    ports:
+      - "127.0.0.1:4840:4840"         # OPC UA endpoint (localhost only)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 4840), 2).close()"]
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  ews:
+    build: ./it/ews        # engineering workstation: the IT/OT pivot box (runs sshd)
+    cap_add:
+      - NET_ADMIN           # for real iptables containment (isolate/block actions)
+    environment:
+      PLC_HOST: "plc"
+      S7_PORT: "102"
+      OPC_ENDPOINT: "opc.tcp://gateway:4840/kaaval/"
+      KAAVAL_SIM_PATH: "/opt/sim"
+    volumes:
+      # The OT client scripts resolve the ACTIVE process's S7 tag map from the sim
+      # package (single source of truth). Read-only; the switch script pins the
+      # process via sim/active_process (SSH logins don't inherit docker env).
+      - ./sim:/opt/sim:ro
+    networks:
+      kaaval:
+        ipv4_address: 172.30.0.12
+    ports:
+      - "127.0.0.1:2222:22"           # host-side SSH debug access (optional, localhost only)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 22), 2).close()"]
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 8s
+    restart: unless-stopped
+
+  c2:
+    build: ./it/c2         # external endpoint: TLS beacon target + SSH client
+    networks:
+      kaaval:
+        ipv4_address: 172.30.0.13
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 443), 2).close()"]
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 8s
+    restart: unless-stopped
+
+  attacker:
+    build: ./attacker      # red-team service: ATT&CK-tagged kill chain over HTTP
+    depends_on:
+      ews:
+        condition: service_healthy
+      c2:
+        condition: service_healthy
+      plc:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+    environment:
+      EWS_HOST: "ews"
+      C2_HOST: "c2"
+    networks:
+      kaaval:
+        ipv4_address: 172.30.0.14
+    ports:
+      - "127.0.0.1:8090:8090"         # attacker HTTP API (localhost only)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 8090), 2).close()"]
+      interval: 5s
+      timeout: 4s
+      retries: 10
+      start_period: 8s
+    restart: unless-stopped
+
+  sensor:
+    build: ./sensor        # Zeek + ICSNPP, sidecar in the ews network namespace
+    network_mode: "service:ews"   # shares ews netns -> sniffs the whole IT->OT chain
+    depends_on:
+      ews:
+        condition: service_healthy
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    volumes:
+      - ./logs:/logs        # JSON logs land here for the backend to tail
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      gateway:
+        condition: service_healthy
+      sensor:
+        condition: service_started
+    environment:
+      # --- container-internal wiring (always these; override .env) ---
+      OPC_ENDPOINT: "opc.tcp://gateway:4840/kaaval/"
+      KAAVAL_ATTACKER_URL: "http://attacker:8090"
+      KAAVAL_COMPOSE_PROJECT: "kaaval"
+      KAAVAL_COMPOSE_FILE: "/app/docker-compose.yml"
+      KAAVAL_LOG_DIR: "/app/logs"
+      KAAVAL_CORS_ORIGINS: "http://localhost:8080,http://127.0.0.1:8080"
+      KAAVAL_SEED_DEMO_USERS: "1"          # demo admin/approver/operator tokens (lab only)
+      KAAVAL_PROCESS: "${KAAVAL_PROCESS:-pump}"
+      # --- LLM provider (from .env; OpenRouter is the default) ---
+      KAAVAL_LLM_PROVIDER: "${KAAVAL_LLM_PROVIDER:-openrouter}"
+      KAAVAL_LLM_MODEL: "${KAAVAL_LLM_MODEL:-}"
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      KAAVAL_OPENROUTER_URL: "${KAAVAL_OPENROUTER_URL:-https://openrouter.ai/api/v1/chat/completions}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      # local Ollama (only used when KAAVAL_LLM_PROVIDER=local). Defaults to a host
+      # Ollama (best on Mac/Metal); set to http://ollama:11434 with `--profile local`.
+      OLLAMA_HOST: "${OLLAMA_HOST:-http://host.docker.internal:11434}"
+      KAAVAL_MODEL: "${KAAVAL_MODEL:-qwen3:30b-a3b}"
+    volumes:
+      - ./logs:/app/logs                              # read the sensor's Zeek JSON logs
+      - /var/run/docker.sock:/var/run/docker.sock     # lab executor drives sibling containers
+    extra_hosts:
+      - "host.docker.internal:host-gateway"           # reach a host-native Ollama on Linux
+    networks:
+      - kaaval
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - kaaval
+    ports:
+      - "127.0.0.1:8080:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    restart: unless-stopped
+
+  # --- optional: fully-offline local LLM (Linux: container; Mac: prefer host) ---
+  ollama:
+    image: ollama/ollama:0.5.4
+    profiles: ["local"]
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - kaaval
+    ports:
+      - "127.0.0.1:11434:11434"
+    restart: unless-stopped
+
+networks:
+  kaaval:
+    name: kaaval
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24   # static asset IPs; must match profiles/*.yaml
+
+volumes:
+  ollama_models:

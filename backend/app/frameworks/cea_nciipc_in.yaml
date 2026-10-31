@@ -1,0 +1,71 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+config_schema: 1
+framework:
+  id: cea_nciipc_in
+  name: "CEA Cyber Security Guidelines + NCIIPC (India)"
+  full_name: "CEA Cyber Security in Power Sector Guidelines, 2021 + NCIIPC CII protection + CERT-In directions"
+  version: "CEA 2021 · NCIIPC · CERT-In 2022"
+  authority: "Central Electricity Authority / NCIIPC / CERT-In (India)"
+  note: "Mapped to clauses assessable from network + SOC telemetry. CII = Critical Information Infrastructure."
+
+controls:
+  - id: "CEA 6.1"
+    family: "CEA · Asset & CII Identification"
+    title: "Inventory of cyber assets / identification of CII"
+    check: asset_inventory
+  - id: "CEA 7.2"
+    family: "CEA · Network Architecture"
+    title: "Segregation of IT and OT / control system networks"
+    check: zones_conduits
+  - id: "CEA 8.1"
+    family: "CEA · Access Control"
+    title: "Access control to control systems (authorized clients only)"
+    check: ot_access_control
+  - id: "CEA 8.4"
+    family: "CEA · Access Control"
+    title: "Maker–checker for control changes (segregation of duties)"
+    check: separation_of_duties
+  - id: "CEA 9.1"
+    family: "CEA · Monitoring"
+    title: "Security monitoring of the control system network (SOC)"
+    check: network_monitoring
+  - id: "CEA 9.3"
+    family: "CEA · Monitoring"
+    title: "Detection of cyber incidents and anomalies"
+    check: detection_capability
+  - id: "NCIIPC R1"
+    family: "NCIIPC · CII Protection"
+    title: "Detection of rogue / unauthorized devices on CII"
+    check: detection_capability
+  - id: "CEA 10.1"
+    family: "CEA · Incident Response"
+    title: "Incident detection, correlation and response"
+    check: incident_response
+  - id: "CEA 10.3"
+    family: "CEA · Incident Response"
+    title: "Authorized, attributable remediation of control actions"
+    check: human_approval_gate
+  - id: "CERT-In 4(i)"
+    family: "CERT-In Directions 2022"
+    title: "Maintenance of secure logs (audit trail of actions)"
+    check: audit_logging
+  - id: "NCIIPC R4"
+    family: "NCIIPC · Data Protection"
+    title: "Control of data leaving the protected CII boundary"
+    check: egress_control
+  - id: "CEA 10.2"
+    family: "CEA · Incident Response"
+    title: "Recovery from incident verified"
+    check: remediation_verification
+  - id: "CERT-In 5"
+    family: "CERT-In Directions 2022"
+    title: "Log retention for 180 days in Indian jurisdiction"
+    check: not_assessed
+    params:
+      reason: "Retention duration / data-localization is an operational/storage control; not observable here."
+  - id: "CEA 11.1"
+    family: "CEA · Reporting"
+    title: "Incident reporting to CERT-In / NCIIPC within timelines"
+    check: not_assessed
+    params:
+      reason: "External reporting to CERT-In/NCIIPC is a procedural control; assess by process review."

@@ -1,0 +1,177 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Kaaval deployment profile #1 — water pumping station.
+# The engine is generic; everything scenario-specific lives here. Authorization
+# is declared (who may speak each protocol), so detection decides authorized vs
+# unauthorized from THIS inventory, not from hardcoded IPs or a capture invariant.
+# Drop in a different profile (different assets/protocols) and the engine still works.
+
+name: Water Pumping Station
+description: Siemens-controlled pump station; discharge-pressure safety interlock.
+
+# Physical-safety descriptor — the process variable + band + danger threshold the
+# SOC uses for status and recovery (scenario-agnostic; no hardcoded pump numbers in
+# code). Reproduces the original constants exactly.
+safety:
+  variable: discharge_pressure_bar
+  unit: bar
+  label: Discharge pressure
+  band: [4.0, 6.0]          # nominal in-band range
+  danger: 12.0              # burst threshold
+  interlock_tag: interlock_enabled
+  control_tag: pump_setpoint_pct     # the authorized operator setpoint
+  control_baseline: 50.0
+
+# UI hint: the live tags to surface in the process panel and how to label them.
+process_view:
+  title: Pump station
+  primary: discharge_pressure_bar
+  tags:
+    - {tag: discharge_pressure_bar, label: Discharge pressure, unit: bar}
+    - {tag: flow_rate_m3h,          label: Flow rate,          unit: m³/h}
+    - {tag: pump_speed_pct,         label: Pump speed,         unit: "%"}
+    - {tag: tank_level_pct,         label: Tank level,         unit: "%"}
+    - {tag: pump_setpoint_pct,      label: Setpoint,           unit: "%"}
+    - {tag: interlock_enabled,      label: Safety interlock,   kind: bool}
+    - {tag: pump_running,           label: Pump running,       kind: bool}
+
+assets:
+  - id: plc
+    ips: ["172.30.0.10"]
+    mac: "00:1B:1B:2A:4C:10"        # Siemens AG OUI -> vendor resolved locally
+    vendor: "Siemens"
+    product: "SIMATIC S7-1200"
+    firmware: "4.2"
+    role: "Siemens PLC (pump controller)"
+    domain: OT
+    criticality: critical
+    process_context: >
+      Runs the pump-station control logic and the discharge-pressure safety
+      interlock. An unauthorized write here can disable the interlock or force
+      the pump, risking a pipe burst.
+  - id: gateway
+    ips: ["172.30.0.11"]
+    mac: "00:0E:8C:33:71:11"        # Siemens AG OUI
+    vendor: "Siemens"
+    role: "IT/OT gateway"
+    domain: OT
+    criticality: high
+    process_context: >
+      Authorized boundary device: polls the PLC over S7comm and exposes OPC UA
+      to the IT side. The only authorized S7comm client of the PLC.
+  - id: ews
+    ips: ["172.30.0.12"]
+    role: "Engineering workstation"
+    domain: IT
+    criticality: high
+    process_context: >
+      Operator workstation. Not an authorized OT speaker — any S7comm or OPC UA
+      it originates is anomalous.
+  - id: soc_backend
+    ips: ["127.0.0.1"]
+    role: "Kaaval SOC backend (authorized OPC UA client)"
+    domain: IT
+    criticality: high
+    process_context: >
+      Authorized OPC UA client; reads process state and issues approved control
+      writes through the gateway (never direct to the PLC).
+  # NOTE: the adversary (172.30.0.14) and C2 (172.30.0.13) are intentionally NOT
+  # declared. Passive discovery must learn them honestly — they appear ONLY when the
+  # attack runs, as UNMANAGED hosts that rogue-host detection flags. The "external
+  # adversary" / "C2 endpoint" labels are a CONCLUSION drawn in the correlation/
+  # narrative layer (app/adversary.py) from behavior, never a pre-seeded inventory.
+
+# Per-protocol authorization baseline (the declared environment policy).
+# allowed_clients = asset ids permitted to originate that protocol toward plant
+# assets; allow_write = whether write/command operations are permitted at all.
+authorization:
+  s7comm:
+    allowed_clients: [gateway]
+    allow_write: false
+  opcua:
+    allowed_clients: [soc_backend, gateway]
+    allow_write: true
+  ssh:
+    allowed_clients: []        # no inbound SSH to plant assets is authorized
+
+# OPC UA node map — process tag -> OPC UA string NodeId. The backend's authorized
+# control path (read state + approved writes) resolves tags through this. Device
+# targets live ONLY here and in the executor; they are never exposed to the LLM.
+opcua_nodes:
+  namespace_uri: "http://traboda.com/kaaval/pumpstation"
+  nodes:
+    discharge_pressure_bar: "PumpStation.DischargePressure"
+    flow_rate_m3h: "PumpStation.FlowRate"
+    pump_speed_pct: "PumpStation.PumpSpeed"
+    tank_level_pct: "PumpStation.TankLevel"
+    pump_setpoint_pct: "PumpStation.PumpSetpoint"
+    pressure_high_limit_bar: "PumpStation.PressureHighLimit"
+    interlock_enabled: "PumpStation.InterlockEnabled"
+    interlock_tripped: "PumpStation.InterlockTripped"
+    pump_running: "PumpStation.PumpRunning"
+
+# Response action catalog. gating.py decides auto-vs-gated from `attributes`
+# (control_plane / reversible / affects_process) — NOT from the action name —
+# and anything unattributed fails safe to gated. `relevant_when` selects which
+# actions fit a given incident. `executor` holds the real device targets (used
+# only by the deterministic executor in actions.py, never by the LLM).
+actions:
+  - id: isolate_ews_ot
+    title: "Isolate the engineering workstation from the OT segment"
+    kind: it
+    rationale: "Cut the compromised workstation off from the OT segment to stop further control-plane access."
+    attributes: {control_plane: false, reversible: true, affects_process: false}
+    relevant_when: {always: true}
+    executor:
+      type: iptables
+      target: ews
+      rules:
+        - {proto: tcp, dport: 102}
+        - {proto: tcp, dport: 4840}
+
+  - id: block_c2_egress
+    title: "Block the workstation's C2 egress (TLS/DNS beacon)"
+    kind: it
+    rationale: "Sever the workstation's command-and-control channel."
+    attributes: {control_plane: false, reversible: true, affects_process: false}
+    relevant_when: {rule: c2_beaconing}
+    executor:
+      type: iptables
+      target: ews
+      rules:
+        - {proto: tcp, dport: 443}
+        - {proto: udp, dport: 53}
+
+  - id: disable_ews_account
+    title: "Disable the compromised engineer account on the workstation"
+    kind: it
+    rationale: "Revoke the compromised operator credentials used in the intrusion."
+    attributes: {control_plane: false, reversible: true, affects_process: false}
+    relevant_when: {rule: external_remote_access}
+    executor:
+      type: account_lock
+      target: ews
+      user: engineer
+
+  - id: rearm_interlock
+    title: "Re-arm the discharge-pressure safety interlock"
+    kind: ot
+    rationale: "Restore the disabled discharge-pressure safety interlock."
+    attributes: {control_plane: true, reversible: true, affects_process: true}
+    relevant_when: {ot_write: true}
+    executor:
+      type: opcua_write
+      writes:
+        - {tag: interlock_enabled, value: true, vtype: bool}
+      verify: {tag: interlock_enabled, equals: true}
+
+  - id: restore_setpoint
+    title: "Restore the safe pump setpoint"
+    kind: ot
+    rationale: "Return the pump setpoint to its safe operating value."
+    attributes: {control_plane: true, reversible: true, affects_process: true}
+    relevant_when: {ot_write: true}
+    executor:
+      type: opcua_write
+      writes:
+        - {tag: pump_setpoint_pct, value: 50.0, vtype: real}
+      verify: {tag: pump_setpoint_pct, near: 50.0, tol: 1.0}

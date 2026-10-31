@@ -1,0 +1,142 @@
+/* Self-hosted fonts (bundled by Vite — no CDN, works offline). */
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme variables (RGB channels). Dark is the default; .light overrides. */
+:root {
+  --bg: 8 11 19;        --panel: 14 20 34;     --panel2: 19 27 44;    --panel3: 24 34 58;
+  --edge: 30 42 62;     --edge2: 42 58 84;
+  --text: 199 210 224;  --muted: 111 124 146;  --faint: 74 86 112;
+  --brand: 45 212 191;  --brandDim: 27 142 128;
+  --crit: 255 92 92;    --high: 245 165 36;    --med: 230 200 75;     --low: 74 163 255;
+  --info: 111 124 146;  --ok: 46 230 166;
+  --vignette: rgba(70,95,140,0.06);
+  /* Theme-aware chrome: shadow / scrollbar / selection / section tick. A dark
+     shadow on a light surface is what makes a light theme feel cheap, so light
+     gets soft, cool, layered shadows instead of these. */
+  --panel-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+  --pop-shadow: 0 18px 44px -14px rgb(0 0 0 / 0.65), 0 4px 12px -4px rgb(0 0 0 / 0.5);
+  --scrollbar: 36 50 71;          --scrollbar-hover: 49 69 99;
+  --tick: 42 58 84;
+  --sel-bg: rgb(45 212 191 / 0.28);  --sel-fg: 234 246 243;
+  --scrim: rgb(4 7 15 / 0.58);
+}
+.light {
+  --bg: 243 245 249;    --panel: 255 255 255;  --panel2: 248 250 252;  --panel3: 240 244 249;
+  --edge: 226 232 240;  --edge2: 205 214 226;
+  --text: 17 24 39;     --muted: 96 109 130;   --faint: 150 162 180;
+  --brand: 13 148 136;  --brandDim: 15 118 110;
+  --crit: 220 38 38;    --high: 217 119 6;     --med: 202 138 4;       --low: 37 99 235;
+  --info: 96 109 130;   --ok: 5 150 105;
+  --vignette: rgb(45 170 150 / 0.06);
+  /* Soft, cool-tinted, layered shadow — the premium-light signature. */
+  --panel-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.07);
+  --pop-shadow: 0 18px 44px -14px rgb(15 23 42 / 0.20), 0 4px 14px -6px rgb(15 23 42 / 0.12);
+  --scrollbar: 203 213 225;       --scrollbar-hover: 148 163 184;
+  --tick: 203 213 225;
+  --sel-bg: rgb(13 148 136 / 0.16);  --sel-fg: 15 23 42;
+  --scrim: rgb(30 41 59 / 0.30);
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  /* Quiet base — a single subtle vignette for depth, theme-aware. */
+  background:
+    radial-gradient(1300px 800px at 85% -25%, var(--vignette), transparent 62%),
+    rgb(var(--bg));
+  background-attachment: fixed;
+  color: rgb(var(--text));
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: -0.003em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgb(var(--scrollbar)); border-radius: 6px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--scrollbar-hover)); background-clip: content-box; }
+::-webkit-scrollbar-track { background: transparent; }
+* { scrollbar-color: rgb(var(--scrollbar)) transparent; }
+::selection { background: var(--sel-bg); color: rgb(var(--sel-fg)); }
+
+:focus-visible { outline: none; box-shadow: 0 0 0 1px rgb(var(--brand) / 0.6), 0 0 10px -2px rgb(var(--brand) / 0.4); }
+
+@layer components {
+  /* Panels — flat, crisp surface: hairline border + one soft shadow. No gradients. */
+  .panel {
+    @apply bg-panel border border-edge rounded-md;
+    box-shadow: var(--panel-shadow);
+  }
+  /* Floating surfaces (modals, slide-overs, popovers) lift further off the page. */
+  .pop { box-shadow: var(--pop-shadow); }
+  /* Frosted modal scrim — theme-aware dim + subtle blur (premium overlay). */
+  .scrim {
+    background: var(--scrim);
+    backdrop-filter: blur(4px) saturate(115%);
+    -webkit-backdrop-filter: blur(4px) saturate(115%);
+  }
+  /* Subtle interactive lift for clickable cards/rows. */
+  .lift { @apply transition-all duration-150; }
+  .lift:hover { transform: translateY(-1px); box-shadow: var(--pop-shadow); }
+  /* Section header bar — used by the Panel primitive. Flat, no teal wash. */
+  .panel-head {
+    @apply flex items-center justify-between h-9 px-3 border-b border-edge shrink-0;
+  }
+  .panel-title {
+    @apply text-2xs uppercase tracking-[0.1em] text-faint font-semibold flex items-center gap-2;
+  }
+  /* neutral hairline tick before a section title (chrome, not decoration) */
+  .panel-title::before { content: ""; width: 2px; height: 10px; border-radius: 2px; background: rgb(var(--tick)); display: inline-block; }
+
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+  .chip {
+    @apply inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-sm border border-edge text-muted;
+  }
+
+  /* Buttons — crisp, tactile: hover tints the border, click presses down 1px. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-medium
+           border border-edge2 text-text bg-panel2 hover:border-brand/60 hover:bg-panel3
+           active:translate-y-px disabled:opacity-40 disabled:pointer-events-none
+           transition-[color,background-color,border-color,transform,box-shadow] duration-150;
+  }
+  .btn-brand { @apply border-brand/50 text-brand bg-brand/10 hover:bg-brand/[0.16] hover:border-brand/70; box-shadow: 0 1px 2px rgb(var(--brand) / 0.12); }
+  .btn-brand:hover { box-shadow: 0 2px 8px -2px rgb(var(--brand) / 0.30); }
+  .btn-danger { @apply border-crit/50 text-crit bg-crit/10 hover:bg-crit/[0.16] hover:border-crit/70; }
+
+  /* Severity tag — text + thin ruled border. */
+  .sev { @apply text-2xs font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-sm border; }
+  .sev-critical { @apply text-crit border-crit/45 bg-crit/10; }
+  .sev-high     { @apply text-high border-high/45 bg-high/10; }
+  .sev-medium   { @apply text-med  border-med/40; }
+  .sev-low      { @apply text-low  border-low/40; }
+  .sev-info     { @apply text-info border-edge; }
+
+  /* Status pill — top bar. */
+  .pill { @apply inline-flex items-center gap-1.5 h-6 px-2 rounded-full text-2xs border border-edge text-muted; }
+
+  /* status dots (with a soft halo) */
+  .dot { @apply inline-block w-1.5 h-1.5 rounded-full; }
+  .dot-ok       { background: rgb(var(--ok));   box-shadow: 0 0 6px -1px rgb(var(--ok) / 0.55); }
+  .dot-degraded { background: rgb(var(--high)); box-shadow: 0 0 6px -1px rgb(var(--high) / 0.55); }
+  .dot-breached { background: rgb(var(--crit)); box-shadow: 0 0 6px -1px rgb(var(--crit) / 0.6); }
+
+  /* compact table */
+  .tbl { @apply w-full text-left border-collapse; }
+  .tbl th { @apply text-2xs uppercase tracking-wide text-muted font-medium px-2 h-7 border-b border-edge; }
+  .tbl td { @apply px-2 h-[30px] border-b border-edge/60 align-middle; }
+  .tbl tr:hover td { @apply bg-panel2/70; }
+
+  .link { @apply text-brand hover:text-brand/80; }
+}

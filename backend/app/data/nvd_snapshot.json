@@ -1,0 +1,58 @@
+{
+  "_note": "Offline NVD snapshot for air-gapped / local mode. Keyed by CPE product-prefix (first 5 CPE fields). A prefix PRESENT with an empty cves[] means 'assessed, none known'; a prefix ABSENT means 'not assessed' (no data) — never rendered as safe. Cloud mode bypasses this and queries NVD live through the egress boundary. Snapshot curated 2024-06.",
+  "cpe:2.3:o:siemens:s7-1200_firmware": {
+    "snapshot_date": "2024-06-01",
+    "cves": [
+      {
+        "id": "CVE-2022-38465",
+        "cvss": 9.3,
+        "severity": "CRITICAL",
+        "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "published": "2022-10-11",
+        "summary": "SIMATIC S7-1200/S7-1500 CPUs protect the integrity/confidentiality of configuration data with a global private key shared across the product line; an attacker who extracts the key from one device can decrypt protected configuration on any device (SSA-568428).",
+        "affected": "S7-1200 firmware < V4.5.0"
+      },
+      {
+        "id": "CVE-2020-15782",
+        "cvss": 8.1,
+        "severity": "HIGH",
+        "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "published": "2021-05-28",
+        "summary": "Memory protection bypass on SIMATIC S7-1200/S7-1500 CPUs: an unauthenticated remote attacker on TCP/102 can write/read arbitrary memory and bypass the sandbox to run native code (SSA-434534).",
+        "affected": "S7-1200 firmware < V4.4.1"
+      },
+      {
+        "id": "CVE-2019-10943",
+        "cvss": 7.2,
+        "severity": "HIGH",
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:N/I:H/A:H",
+        "published": "2019-05-22",
+        "summary": "An attacker with network access to the S7-1200 could modify program/firmware on the device before it is loaded, due to insufficient integrity checks on TCP/102 (SSA-232418).",
+        "affected": "S7-1200 all firmware versions"
+      }
+    ]
+  },
+  "cpe:2.3:a:openbsd:openssh": {
+    "snapshot_date": "2024-06-01",
+    "cves": [
+      {
+        "id": "CVE-2024-6387",
+        "cvss": 8.1,
+        "severity": "HIGH",
+        "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "published": "2024-07-01",
+        "summary": "regreSSHion: a signal-handler race condition in OpenSSH server (sshd) allows unauthenticated remote code execution as root on glibc-based Linux.",
+        "affected": "OpenSSH 8.5p1 - 9.7p1"
+      },
+      {
+        "id": "CVE-2023-38408",
+        "cvss": 9.8,
+        "severity": "CRITICAL",
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "published": "2023-07-20",
+        "summary": "Remote code execution in ssh-agent's PKCS#11 forwarding: a remote attacker may load and run code via a forwarded agent if specific libraries are present on the victim.",
+        "affected": "OpenSSH < 9.3p2"
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+# Kaaval backend (native or containerized). Detection is stdlib; these power the
+# API + OPC UA client, the compliance/case report renderers, and profile parsing.
+fastapi>=0.110,<1
+uvicorn[standard]>=0.27,<1
+asyncua>=1.1,<2
+PyYAML>=6.0,<7          # profile/playbook/framework parsing (hard import: profile.py)
+python-docx>=1.1,<2     # branded DOCX case/compliance reports (case_report, compliance_render)
+reportlab>=4.0,<5       # branded PDF case/compliance reports
+pytest>=8.0,<9

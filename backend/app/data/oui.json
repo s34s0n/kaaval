@@ -1,0 +1,20 @@
+{
+  "_note": "Curated IEEE OUI subset (first 3 octets, uppercase hex, no separators). A production deployment loads the full IEEE registry; this covers the demo + common ICS/IT vendors. Vendor lookup is LOCAL — no egress.",
+  "001B1B": "Siemens AG",
+  "000E8C": "Siemens AG",
+  "8CF319": "Siemens AG",
+  "208756": "Siemens AG",
+  "001C06": "Siemens AG",
+  "0000BC": "Rockwell Automation",
+  "002073": "Rockwell Automation",
+  "0080F4": "Schneider Electric",
+  "0000BA": "Schneider Electric",
+  "00A031": "Honeywell",
+  "001AA1": "Cisco Systems",
+  "00000C": "Cisco Systems",
+  "001422": "Dell Inc.",
+  "005056": "VMware, Inc.",
+  "000C29": "VMware, Inc.",
+  "B827EB": "Raspberry Pi Foundation",
+  "001801": "Yokogawa Electric"
+}

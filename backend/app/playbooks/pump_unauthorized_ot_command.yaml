@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+config_schema: 1
+playbook:
+  id: pump_unauthorized_ot_command
+  name: "Unauthorized OT command — verify and restore"
+  version: "2026.06"
+  profile: pumpstation
+  authority: "Kaaval response library"
+  description: >
+    Focused response for an unauthorized OT command/parameter change detected on
+    the control network, with no confirmed IT pivot yet. Verify the source, contain
+    the implicated host, then restore safe OT state under approval.
+  match:
+    techniques: [T0855, T0836, T0831]
+    rules: [unauthorized_s7_command, unauthorized_opcua_access]
+    any_ot: true
+
+steps:
+  - step: investigate
+    title: "Identify the unauthorized OT client"
+    detail: >
+      Determine which host issued the S7comm/OPC UA write and whether it is an
+      authorized client per the profile authorization policy.
+  - step: action
+    action: isolate_ews_ot
+    why: "Contain the implicated workstation from the OT segment (reversible IT containment)."
+  - step: investigate
+    title: "Assess the process impact"
+    detail: "Check whether the safety interlock or setpoint was altered, and the current physical reading."
+  - step: action
+    action: rearm_interlock
+    why: "Re-arm the safety interlock if it was disabled — gated OT recovery."
+  - step: action
+    action: restore_setpoint
+    why: "Restore the safe pump setpoint if it was moved — gated OT recovery."

@@ -1,0 +1,3 @@
+# Kaaval simulator (PLC + gateway). Pure-Python — no native deps.
+python-snap7==3.0.0
+asyncua>=1.1,<2

@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Local asset -> CPE resolution (NCIIPC/NVD CPE 2.3). This join is done LOCALLY;
+# only the resulting CPE string is ever sent to NVD. {version} / {1} are filled in
+# from the asset's firmware/version or a regex capture group from a passive banner.
+# `version` placeholder falls back to '*' (any version) when no version is known.
+config_schema: 1
+
+# (vendor, product) -> CPE, from declared/inferred device metadata.
+products:
+  - match: { vendor: siemens, product_contains: "s7-1200" }
+    cpe: "cpe:2.3:o:siemens:s7-1200_firmware:{version}:*:*:*:*:*:*:*"
+  - match: { vendor: siemens, product_contains: "s7-1500" }
+    cpe: "cpe:2.3:o:siemens:s7-1500_firmware:{version}:*:*:*:*:*:*:*"
+  - match: { vendor: siemens, product_contains: "s7-300" }
+    cpe: "cpe:2.3:o:siemens:s7-300_firmware:{version}:*:*:*:*:*:*:*"
+  - match: { vendor: rockwell, product_contains: "controllogix" }
+    cpe: "cpe:2.3:o:rockwellautomation:controllogix_firmware:{version}:*:*:*:*:*:*:*"
+  - match: { vendor: schneider, product_contains: "modicon" }
+    cpe: "cpe:2.3:o:schneider-electric:modicon_m340_firmware:{version}:*:*:*:*:*:*:*"
+
+# Passive banners observed in Zeek data -> CPE (regex; group 1 is the version).
+banners:
+  - match_re: "OpenSSH[_/]([0-9][0-9A-Za-z.]*)"
+    cpe: "cpe:2.3:a:openbsd:openssh:{1}:*:*:*:*:*:*:*"
+  - match_re: "nginx/([0-9.]+)"
+    cpe: "cpe:2.3:a:nginx:nginx:{1}:*:*:*:*:*:*:*"
+  - match_re: "Apache/([0-9.]+)"
+    cpe: "cpe:2.3:a:apache:http_server:{1}:*:*:*:*:*:*:*"

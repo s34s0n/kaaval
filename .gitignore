@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.uv/
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# Zeek sensor output (host-mounted, regenerated each run)
+logs/*
+!logs/.gitkeep
+
+# Local state / secrets
+.env
+*.sqlite
+*.db
+*.pcap
+*.pcapng
+
+# Local Claude Code / editor machine-specific config
+.claude/settings.local.json
+
+# Marketing/brochure assets — kept out of the code repo (see docs/ release assets)
+docs/brochure/
+docs/*.pptx
+
+# macOS
+.DS_Store
+
+# Office temp/lock files
+~$*
+
+# Local Claude Code runtime artifacts
+.claude/scheduled_tasks.lock
+
+# Runtime stores (regenerated from in-code seeds)
+backend/rules.json
+backend/assets.json
+sim/active_process
+backend/llm.json
+backend/inventory.json
+backend/auth.json
+
+# F6 SIEM runtime config (admin-set, not committed)
+backend/siem.json

@@ -1,0 +1,75 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+config_schema: 1
+framework:
+  id: nist_800_82_r3
+  name: "NIST SP 800-82 Rev 3"
+  full_name: "Guide to Operational Technology (OT) Security"
+  version: "Rev 3 (2023)"
+  authority: "NIST"
+  note: "OT-tailored controls expressed against the CSF function / 800-53 family the guide references."
+
+controls:
+  - id: "ID.AM-1/2"
+    family: "Identify · Asset Management"
+    title: "OT/IT assets inventoried and classified"
+    check: asset_inventory
+  - id: "ID.AM-3"
+    family: "Identify · Asset Management"
+    title: "Communication and data flows mapped"
+    check: network_monitoring
+  - id: "PR.AC-4 / AC-3"
+    family: "Protect · Access Control"
+    title: "Access permissions enforced (authorized OT clients)"
+    check: ot_access_control
+  - id: "PR.AC-5 / AC-5"
+    family: "Protect · Access Control"
+    title: "Separation of duties"
+    check: separation_of_duties
+  - id: "PR.DS-5 / SC-7"
+    family: "Protect · Data Security / Boundary"
+    title: "Boundary protection and controlled information egress"
+    check: egress_control
+  - id: "PR.PT-4 / SC-7"
+    family: "Protect · Protective Technology"
+    title: "Network segmentation (zones/conduits)"
+    check: zones_conduits
+  - id: "DE.CM-1 / SI-4"
+    family: "Detect · Continuous Monitoring"
+    title: "Network monitored to detect potential events"
+    check: network_monitoring
+  - id: "DE.AE-2 / SI-4"
+    family: "Detect · Anomalies & Events"
+    title: "Detected events analyzed (protocol-aware OT detection)"
+    check: detection_capability
+  - id: "AU-2 / AU-9"
+    family: "Protect · Audit & Accountability"
+    title: "Auditable events captured in tamper-resistant logs"
+    check: audit_logging
+  - id: "AU-10"
+    family: "Protect · Audit & Accountability"
+    title: "Non-repudiation of control actions"
+    check: human_approval_gate
+  - id: "RS.RP-1 / IR-4"
+    family: "Respond · Response Planning"
+    title: "Incident response process executed"
+    check: incident_response
+  - id: "RS.MI-2 / IR-4"
+    family: "Respond · Mitigation"
+    title: "Incidents mitigated (human-gated control actions)"
+    check: human_approval_gate
+  - id: "RC.RP-1 / CP-10"
+    family: "Recover · Recovery Planning"
+    title: "Recovery executed and verified"
+    check: remediation_verification
+  - id: "ID.RA-1 / RA-5"
+    family: "Identify · Risk Assessment"
+    title: "Asset vulnerabilities identified"
+    check: not_assessed
+    params:
+      reason: "Vulnerability/CVE correlation is a separate capability (F3); not yet assessed."
+  - id: "PR.IP / PE"
+    family: "Protect · Physical & Environmental"
+    title: "Physical access controls"
+    check: not_assessed
+    params:
+      reason: "Physical security is not observable from network telemetry; assess by site audit."
